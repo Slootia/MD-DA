@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE, collapse = TRUE)
 Загрузите данные о землятресениях
 
 ```{r}
-anss <- readLines("https://raw.githubusercontent.com/SergeyMirvoda/MD-DA-2017/master/data/earthquakes_2011.html", warn=FALSE)
+anss <- readLines("https://raw.githubusercontent.com/SergeyMirvoda/MD-DA-2018/master/data/earthquakes_2011.html", warn=FALSE)
 ```
 
 Выберите строки, которые содержат данные с помощью регулярных выражений и функции grep
