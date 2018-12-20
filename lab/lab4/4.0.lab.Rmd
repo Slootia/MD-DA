@@ -1,0 +1,133 @@
+---
+title: "4laba"
+author: "Kuzminykh Ivan"
+date: "December 20, 2018"
+output: html_document
+---
+
+## Загрузка данных, обзывание
+
+``` {r}
+data <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/abalone/abalone.data", header=TRUE, sep=",")
+colnames(data) <- c("sex", "length", "diameter", "height", 
+                    "whole_weight", "shucked_weight",
+                    "viscera_weight", "shell_weight", "rings")
+data$sex <- factor(c("Female", "Infant", "Male")[data$sex])
+summary(data)
+```
+
+### Возможно интересные колонки
+``` {r}
+hist(data$diameter, main = "Диаметр, мм")
+hist(data$height, main = "Высота, мм")
+hist(data$whole_weight, main = "Полный вес, гр")
+hist(data$rings, main = "Количество колец на ракушке, шт.")
+```
+
+## Линейные модели по изначальным данным
+
+### Вес от диаметра
+``` {r}
+lm.d.1 <- lm(whole_weight ~ diameter, data=data)
+summary(lm.d.1)
+plot(lm.d.1)
+```
+
+### Вес от высоты
+``` {r}
+lm.h.1 <- lm(whole_weight ~ height, data=data)
+summary(lm.h.1)
+plot(lm.h.1)
+```
+
+### Количество колец от веса
+``` {r}
+lm.r.1 <- lm(rings ~ whole_weight, data=data)
+summary(lm.r.1)
+plot(lm.r.1)
+```
+
+## Избавление от выбросов
+``` {r}
+data.noout <- data[complete.cases(data),]
+data.noout <- data.noout[data.noout$diameter > .1 & data.noout$diameter < .6,]
+data.noout <- data.noout[data.noout$height < .2 & data.noout$height > 0.05,]
+data.noout <- data.noout[data.noout$whole_weight < 1.8,]
+data.noout <- data.noout[data.noout$rings >= 5 & data.noout$rings < 20,]
+```
+
+``` {r}
+hist(data.noout$diameter, main = "Диаметр, мм")
+hist(data.noout$height, main = "Высота, мм")
+hist(data.noout$whole_weight, main = "Полный вес, гр")
+hist(data$rings, main = "Количество колец на ракушке, шт.")
+```
+
+## Линейные модели по очищеным данным
+
+### Вес от диаметра
+``` {r}
+lm.d.2 <- lm(whole_weight ~ diameter, data=data.noout)
+summary(lm.d.2)
+plot(lm.d.2)
+```
+
+### Вес от высоты
+``` {r}
+lm.h.2 <- lm(whole_weight ~ height, data=data.noout)
+summary(lm.h.2)
+plot(lm.h.2)
+```
+
+### Кол-во колец от веса
+``` {r}
+lm.r.2 <- lm(rings ~ whole_weight, data=data.noout)
+summary(lm.r.2)
+plot(lm.r.2)
+```
+
+### Делим пополам
+``` {r}
+odds <- seq(1, nrow(data.noout), by=2)
+data.in <- data.noout[odds,]
+data.out <- data.noout[-odds,]
+```
+
+### Предсказание веса по диаметру
+``` {r}
+lm.d.half <- lm(whole_weight ~ diameter, data=data.in)
+summary(lm.d.half)
+data.d.pred <- predict(lm.d.half)
+cor(data.in$whole_weight, data.d.pred)
+plot(data.in$whole_weight, data.d.pred)
+
+data.d.pred.out <- predict(lm.d.half, data.out)
+cor(data.out$whole_weight, data.d.pred.out)
+plot(data.out$whole_weight, data.d.pred.out)
+```
+
+### Предсказание веса по высоте
+``` {r}
+lm.h.half <- lm(whole_weight ~ height, data=data.in)
+summary(lm.h.half)
+data.h.pred <- predict(lm.h.half)
+cor(data.in$whole_weight, data.h.pred)
+plot(data.in$whole_weight, data.h.pred)
+
+data.h.pred.out <- predict(lm.h.half, data.out)
+cor(data.out$whole_weight, data.h.pred.out)
+plot(data.out$whole_weight, data.h.pred.out)
+```
+
+### Предсказание кол-ва колец по весу
+``` {r}
+lm.r.half <- lm(rings ~ whole_weight, data=data.in)
+summary(lm.r.half)
+data.r.pred <- predict(lm.r.half)
+cor(data.in$rings, data.r.pred)
+plot(data.in$rings, data.r.pred)
+
+data.r.pred.out <- predict(lm.r.half, data.out)
+cor(data.out$rings, data.r.pred.out)
+plot(data.out$rings, data.r.pred.out)
+```

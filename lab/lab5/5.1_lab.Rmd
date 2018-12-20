@@ -1,0 +1,79 @@
+---
+title: "5laba"
+author: "Kuzminykh Ivan"
+date: "December 20, 2018"
+output: html_document
+---
+
+``` {r include=FALSE}
+library(dplyr)
+library(gplots)
+library(multcomp)
+```
+
+## Загрузка и обработка данных
+
+``` {r}
+data = read.csv("https://www.sheffield.ac.uk/polopoly_fs/1.570199!/file/stcp-Rdataset-Diet.csv",row.names=1)
+colnames(data) <- c("gender", "age", "height", "initial.weight", 
+                    "diet.type", "final.weight")
+data$diet.type <- factor(c("A", "B", "C")[data$diet.type])
+data$gender <- factor(c('F', 'M')[data$gender + 1])
+data$weight.loss = data$initial.weight - data$final.weight
+
+summary(data)
+```
+
+## Проверка на выбросы и плохие данные и избавление от них
+
+``` {r}
+hist(data$height)
+hist(data$initial.weight)
+hist(data$final.weight)
+hist(data$weight.loss)
+```
+``` {r}
+data <- data %>%
+  filter(
+    weight.loss >= 0 & weight.loss <= 8 &
+    initial.weight <= 90 & final.weight <= 90 &
+    !is.na(gender) & !is.na(diet.type)
+  )
+summary(data)
+```
+
+## Визуальная проверка различия
+
+``` {r}
+boxplot(weight.loss~gender,data=data,col="light gray",
+        ylab = "Weight loss (kg)", xlab = "Diet type")
+abline(h=0,col="green")
+```
+
+### График групповых средних
+
+``` {r}
+plotmeans(weight.loss ~ gender, data=data)
+aggregate(data$weight.loss, by = list(data$gender), FUN=sd)
+```
+
+### Частный случай линейной модели lm тест на межгрупповые различия
+
+``` {r}
+fit <- aov(weight.loss ~ gender, data=data)
+summary(fit)
+```
+
+### Попарные различия между средними значениями для всех групп
+
+``` {r}
+TukeyHSD(fit)
+```
+
+### Tukey honest significant differences test
+
+``` {r}
+par(mar=c(5,4,6,2))
+tuk <- glht(fit, linfct=mcp(gender="Tukey"))
+plot(cld(tuk, level=.05),col="lightgrey") 
+```
