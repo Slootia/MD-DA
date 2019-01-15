@@ -1,0 +1,8 @@
+```{R}
+data = read.csv("https://datamillnorth.org/download/noise-nuisance-out-of-hours/270f7830-ca54-4fc7-b06c-dd1b807b44ae/2018_04_30%2520Noise%2520OOH%252001-Oct-17%2520to%252031-Mar-18%2520%25281%2529.csv")
+colnames(data)
+data <- data[,!(colnames(data) %in% c("Sr_Num","Enq_Type"))]
+colnames(data) <- c("Дата вызова", "Почтовый код района", "Тип шума")
+summary(data)
+plot(data$`Дата вызова`, data$`Почтовый код района`)
+```
